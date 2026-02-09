@@ -5,6 +5,9 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.gamepieces.GamePieceOnFieldSimulation;
+import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnField;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -21,8 +24,10 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class FuelSim {
     protected static final double PERIOD = 0.02; // sec
@@ -353,6 +358,27 @@ public class FuelSim {
     }
 
     /**
+     * Clears fuel that is on the ground (z <= FUEL_RADIUS + 0.03) to prevent buildup of fuel that should be at rest on the field
+     */
+    public void clearGroundFuel() {
+        List<Fuel> removedFuels = new ArrayList<>();
+        fuels = new ArrayList<Fuel>(fuels.stream()
+            .filter(fuel -> {
+                if (fuel.pos.getZ() <= FUEL_RADIUS + 0.03 && fuel.vel.getZ() < 0.05) {
+                    removedFuels.add(fuel);
+                    SimulatedArena.getInstance().addGamePiece(new GamePieceOnFieldSimulation(
+                        RebuiltFuelOnField.REBUILT_FUEL_INFO,
+                        () -> RebuiltFuelOnField.REBUILT_FUEL_INFO.gamePieceHeight().in(Meters) / 2,
+                        new Pose2d(fuel.pos.toTranslation2d(), new Rotation2d()),
+                        fuel.vel.toTranslation2d()));
+                    return false; // Remove
+                }
+                return true; // Keep
+            })
+            .collect(Collectors.toList()));
+    }
+
+    /**
      * Spawns fuel in the neutral zone and depots
      */
     public void spawnStartingFuel() {
@@ -509,6 +535,9 @@ public class FuelSim {
                 handleIntakes(fuels);
             }
         }
+
+        // Remove fuels that are below the floor
+        clearGroundFuel();
 
         logFuels();
     }
