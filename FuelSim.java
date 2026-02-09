@@ -24,10 +24,12 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FuelSim {
     protected static final double PERIOD = 0.02; // sec
@@ -422,7 +424,13 @@ public class FuelSim {
      */
     public void logFuels() {
         // fuelPublisher.set(fuels.stream().map((fuel) -> fuel.pos).toArray(Translation3d[]::new));
-        Logger.recordOutput("FieldSimulation/Flying Fuel", fuels.stream().map((fuel) -> fuel.pos).toArray(Translation3d[]::new));
+        Logger.recordOutput("FieldSimulation/Fuel", 
+            Stream.concat(
+                Arrays.stream(
+                    SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel")
+                ),
+                fuels.stream().map(fuel -> new Pose3d(fuel.pos, Rotation3d.kZero)
+            )).toArray(Pose3d[]::new));
     }
 
     /**
