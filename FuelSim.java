@@ -1,5 +1,5 @@
-// https://github.com/hammerheads5000/FuelSim
-package frc.robot.util;
+// Credit to https://github.com/hammerheads5000/FuelSim
+package org.ckrobotics.robot.util.external;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
