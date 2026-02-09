@@ -48,6 +48,8 @@ public class FuelSim {
     protected static final double DRAG_COF = 0.47; // dimensionless
     protected static final double DRAG_FORCE_FACTOR = 0.5 * AIR_DENSITY * DRAG_COF * FUEL_CROSS_AREA;
 
+    private final double TRIVIAL_BASE_LENGTH_OR_WIDTH_OR_HEIGHT = 0.01; // A small value to prevent divide-by-zero in kinematics
+
     protected static final Translation3d[] FIELD_XZ_LINE_STARTS = {
         new Translation3d(0, 0, 0),
         new Translation3d(3.96, 1.57, 0),
@@ -464,6 +466,21 @@ public class FuelSim {
         this.robotWidth = width.in(Meters);
         this.robotLength = length.in(Meters);
         this.bumperHeight = bumperHeight.in(Meters);
+    }
+
+    /**
+     * Registers a non-colliding robot with the fuel simulator
+     * @param poseSupplier
+     * @param fieldSpeedsSupplier field-relative `ChassisSpeeds` supplier
+     */
+    public void registerRobotTrivial(
+            Supplier<Pose2d> poseSupplier,
+            Supplier<ChassisSpeeds> fieldSpeedsSupplier) {
+        this.robotPoseSupplier = poseSupplier;
+        this.robotFieldSpeedsSupplier = fieldSpeedsSupplier;
+        this.robotWidth = TRIVIAL_BASE_LENGTH_OR_WIDTH_OR_HEIGHT;
+        this.robotLength = TRIVIAL_BASE_LENGTH_OR_WIDTH_OR_HEIGHT;
+        this.bumperHeight = TRIVIAL_BASE_LENGTH_OR_WIDTH_OR_HEIGHT;
     }
 
     /**
